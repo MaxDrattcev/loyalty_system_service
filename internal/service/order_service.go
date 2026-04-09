@@ -48,7 +48,7 @@ func (s *orderService) Create(ctx context.Context, numberOrder, userID int64) er
 			if existOrder.UserID != userID {
 				return fmt.Errorf("the order number: %d has already been uploaded by another user: %w", numberOrder, err)
 			} else {
-				return fmt.Errorf("the order number: %d has already been uploaded: %w", ErrOrderAlreadyUploadedBySameUser, err)
+				return fmt.Errorf("the order number: %d has already been uploaded: %w", numberOrder, ErrOrderAlreadyUploadedBySameUser)
 			}
 		}
 		return err
@@ -73,7 +73,8 @@ func (s *orderService) GetOrders(ctx context.Context, userID int64) ([]models.Or
 		orderResp.Number = strOrder
 		orderResp.Status = order.Status
 		if order.Accrual > 0 {
-			orderResp.Accrual = &order.Accrual
+			floatAccrual := float64(order.Accrual) / 100
+			orderResp.Accrual = &floatAccrual
 		}
 		orderResp.Uploaded = order.UploadedAt.Format(time.RFC3339)
 
