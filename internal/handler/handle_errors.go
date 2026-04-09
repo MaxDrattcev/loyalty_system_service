@@ -56,5 +56,11 @@ func handleErrors(c *gin.Context, err error) bool {
 		c.JSON(http.StatusPaymentRequired, gin.H{"error": "Insufficient funds"})
 		return true
 	}
+
+	if errors.Is(err, service.ErrOrderAlreadyUploadedBySameUser) {
+		c.Status(http.StatusOK)
+		return true
+	}
+
 	return false
 }

@@ -59,18 +59,18 @@ func (w *withdrawalService) Withdrawal(ctx context.Context, userID, order int64,
 	})
 }
 
-func (w *withdrawalService) GetWithdrawals(ctx context.Context, userID int64) ([]models.Withdrawal, error) {
-	var withdrawalsResp []models.Withdrawal
+func (w *withdrawalService) GetWithdrawals(ctx context.Context, userID int64) ([]models.WithdrawalResponse, error) {
+	var withdrawalsResp []models.WithdrawalResponse
 	withdrawals, err := w.withdrawalRepo.GetWithdrawals(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting withdrawals for user %d: %w", userID, err)
 	}
 	if len(withdrawals) == 0 {
-		return []models.Withdrawal{}, fmt.Errorf("%w: %d", ErrNoWithdraws, userID)
+		return []models.WithdrawalResponse{}, fmt.Errorf("%w: %d", ErrNoWithdraws, userID)
 	}
 
 	for _, wd := range withdrawals {
-		var withdrawalResp models.Withdrawal
+		var withdrawalResp models.WithdrawalResponse
 		withdrawalResp.Order = fmt.Sprint(wd.OrderNumber)
 		floatSum := float64(wd.SumWithdrawal) / 100
 		withdrawalResp.Sum = floatSum

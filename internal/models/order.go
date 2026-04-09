@@ -21,7 +21,7 @@ const (
 )
 
 type OrderResponse struct {
-	Number   int64       `json:"number"`
+	Number   string      `json:"number"`
 	Status   OrderStatus `json:"status"`
 	Accrual  *int64      `json:"accrual,omitempty"`
 	Uploaded string      `json:"uploaded_at"`

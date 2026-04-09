@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/MaxDrattcev/loyalty_system_service.git/internal/config"
 	"github.com/MaxDrattcev/loyalty_system_service.git/internal/models"
+	"strings"
 )
 
 type loyaltyClient struct {
@@ -21,7 +22,17 @@ func NewLoyaltyClient(cfg *config.Config) LoyaltyClient {
 }
 
 func (l *loyaltyClient) GetAccrual(ctx context.Context, order models.Order) (models.Accrual, error) {
-	url := fmt.Sprintf("http://%s/api/orders/%d", l.cfg.Client.Address, order.Number)
+	addr := strings.TrimSpace(l.cfg.Client.Address)
+	addr = strings.TrimRight(addr, "/")
+
+	if strings.HasPrefix(addr, "http//") {
+		addr = "http://" + strings.TrimPrefix(addr, "http//")
+	}
+
+	if !strings.Contains(addr, "://") {
+		addr = "http://" + addr
+	}
+	url := fmt.Sprintf("%s/api/orders/%d", addr, order.Number)
 
 	headers := map[string]string{
 		"Content-Length": "0",

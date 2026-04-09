@@ -10,7 +10,7 @@ type WithdrawalHistory struct {
 	ProcessedAt   time.Time `db:"processed_at"`
 }
 
-type Withdrawal struct {
+type WithdrawalResponse struct {
 	Order       string  `json:"order"`
 	Sum         float64 `json:"sum"`
 	ProcessedAt *string `json:"processed_at,omitempty"`

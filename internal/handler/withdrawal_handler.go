@@ -46,7 +46,7 @@ func (h *withdrawalHandler) Withdrawal(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	var withdrawal models.Withdrawal
+	var withdrawal models.WithdrawalResponse
 	if err := json.Unmarshal(body, &withdrawal); err != nil {
 		log.Printf("error unmarshalling body: %v", err)
 		c.Status(http.StatusBadRequest)

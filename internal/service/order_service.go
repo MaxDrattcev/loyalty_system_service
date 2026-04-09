@@ -11,7 +11,10 @@ import (
 	"time"
 )
 
-var ErrNoOrders = errors.New("no orders")
+var (
+	ErrNoOrders                       = errors.New("no orders")
+	ErrOrderAlreadyUploadedBySameUser = errors.New("order already uploaded by same user")
+)
 
 type orderService struct {
 	orderRepo     repository.OrderRepository
@@ -45,7 +48,7 @@ func (s *orderService) Create(ctx context.Context, numberOrder, userID int64) er
 			if existOrder.UserID != userID {
 				return fmt.Errorf("the order number: %d has already been uploaded by another user: %w", numberOrder, err)
 			} else {
-				return nil
+				return fmt.Errorf("the order number: %d has already been uploaded: %w", ErrOrderAlreadyUploadedBySameUser, err)
 			}
 		}
 		return err
@@ -66,7 +69,8 @@ func (s *orderService) GetOrders(ctx context.Context, userID int64) ([]models.Or
 
 	for _, order := range orders {
 		var orderResp models.OrderResponse
-		orderResp.Number = order.Number
+		strOrder := fmt.Sprint(order.Number)
+		orderResp.Number = strOrder
 		orderResp.Status = order.Status
 		if order.Accrual > 0 {
 			orderResp.Accrual = &order.Accrual
