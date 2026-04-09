@@ -52,6 +52,7 @@ func (h *orderHandler) Create(c *gin.Context) {
 	ok = luhn.Valid(int(intNumber))
 	if !ok {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid number"})
+		return
 	}
 
 	ctx := c.Request.Context()

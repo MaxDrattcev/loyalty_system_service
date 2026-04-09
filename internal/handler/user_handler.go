@@ -59,7 +59,7 @@ func (u *userHandler) Register(c *gin.Context) {
 }
 
 func (u *userHandler) okLoginPassword(c *gin.Context, login string, password string) bool {
-	const minLen, maxLen = 1, 10
+	const minLen, maxLen = 1, 100
 	l := utf8.RuneCountInString(login)
 	p := utf8.RuneCountInString(password)
 	if login == "" {
@@ -144,6 +144,7 @@ func (u *userHandler) GetBalance(c *gin.Context) {
 			return
 		}
 		c.Status(http.StatusInternalServerError)
+		return
 	}
 	c.JSON(http.StatusOK, balance)
 }
