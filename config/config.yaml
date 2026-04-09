@@ -1,0 +1,27 @@
+server:
+  address: "localhost:8081"
+
+postgres:
+  host: "localhost"
+  port: "5432"
+  user: "maxdratcev"
+  password: "12345678"
+  db_name: "loyalty_system"
+  ssl_mode: "disable"
+  max_conns: 10
+  min_conns: 2
+  max_conn_lifetime: 60
+  max_conn_idle_time: 30
+  path_migration: "file://migrations"
+
+jwt_token:
+  secret: "loyalty@serv"
+  expires_at: 15
+
+client:
+  address: "localhost:8080"
+
+worker:
+  queue_size: 15
+  worker_count: 5
+  interval_get_accrual: 60
