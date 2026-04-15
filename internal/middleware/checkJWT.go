@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// CheckJWT validates Authorization Bearer token, extracts userID from JWT,
+// stores it in request context under "userID", and passes request to next handler.
+// Returns 401 when header is missing/invalid or token parsing fails.
 func CheckJWT(j *token.JWT) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		auth := c.GetHeader("Authorization")

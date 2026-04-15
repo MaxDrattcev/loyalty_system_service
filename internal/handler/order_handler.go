@@ -11,16 +11,19 @@ import (
 	"strings"
 )
 
+// orderHandler implements OrderHandler HTTP endpoints.
 type orderHandler struct {
 	orderService service.OrderService
 }
 
+// NewOrderHandler creates an OrderHandler with provided order service.
 func NewOrderHandler(orderService service.OrderService) OrderHandler {
 	return &orderHandler{
 		orderService: orderService,
 	}
 }
 
+// Create handles order upload request for authenticated user.
 func (h *orderHandler) Create(c *gin.Context) {
 	v, exists := c.Get("userID")
 	if !exists {
@@ -68,6 +71,7 @@ func (h *orderHandler) Create(c *gin.Context) {
 	c.Status(http.StatusAccepted)
 }
 
+// GetOrders handles request for authenticated user's order list.
 func (h *orderHandler) GetOrders(c *gin.Context) {
 	v, exists := c.Get("userID")
 	if !exists {

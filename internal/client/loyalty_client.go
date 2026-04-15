@@ -9,11 +9,13 @@ import (
 	"strings"
 )
 
+// loyaltyClient is an HTTP client for external loyalty accrual API.
 type loyaltyClient struct {
 	cfg    *config.Config
 	client *RetryableClient
 }
 
+// NewLoyaltyClient creates a LoyaltyClient with configured address and retryable HTTP client.
 func NewLoyaltyClient(cfg *config.Config) LoyaltyClient {
 	return &loyaltyClient{
 		cfg:    cfg,
@@ -21,6 +23,10 @@ func NewLoyaltyClient(cfg *config.Config) LoyaltyClient {
 	}
 }
 
+// GetAccrual requests accrual data for an order from loyalty service.
+// It normalizes configured base address, performs GET with retry logic,
+// and unmarshals response JSON into models.Accrual.
+// Returns error when request fails, response body is invalid, or service reports order not found.
 func (l *loyaltyClient) GetAccrual(ctx context.Context, order models.Order) (models.Accrual, error) {
 	addr := strings.TrimSpace(l.cfg.Client.Address)
 	addr = strings.TrimRight(addr, "/")

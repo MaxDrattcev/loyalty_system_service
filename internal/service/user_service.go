@@ -10,12 +10,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// userService implements user business logic.
 type userService struct {
 	userRepository repository.UserRepository
 	jwt            token.JWT
 	cfg            *config.Config
 }
 
+// NewUserService creates a UserService with user repository and JWT provider.
 func NewUserService(userRepository repository.UserRepository, jwt token.JWT) UserService {
 	return &userService{
 		userRepository: userRepository,
@@ -23,6 +25,7 @@ func NewUserService(userRepository repository.UserRepository, jwt token.JWT) Use
 	}
 }
 
+// Register hashes user password, stores user in repository, and returns JWT token.
 func (u *userService) Register(ctx context.Context, user models.User) (string, error) {
 	hash, err := u.hashPassword(user.Password)
 	if err != nil {
@@ -36,6 +39,7 @@ func (u *userService) Register(ctx context.Context, user models.User) (string, e
 	return u.jwt.BuildJWTString(savedUser.ID, savedUser.Login)
 }
 
+// hashPassword returns bcrypt hash of plain password.
 func (u *userService) hashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -44,6 +48,7 @@ func (u *userService) hashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
+// Login verifies credentials and returns JWT token for an existing user.
 func (u *userService) Login(ctx context.Context, user models.User) (string, error) {
 	existingUser, err := u.userRepository.GetByLogin(ctx, user.Login)
 	if err != nil {
@@ -55,10 +60,12 @@ func (u *userService) Login(ctx context.Context, user models.User) (string, erro
 	return u.jwt.BuildJWTString(existingUser.ID, existingUser.Login)
 }
 
+// checkPassword compares plain password with bcrypt hash from storage.
 func (u *userService) checkPassword(password, hashFromDB string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashFromDB), []byte(password))
 }
 
+// GetBalance returns user's current and withdrawn balances converted from cents to float values.
 func (u *userService) GetBalance(ctx context.Context, userID int64) (models.BalanceResponse, error) {
 
 	user, err := u.userRepository.GetByUserID(ctx, userID)

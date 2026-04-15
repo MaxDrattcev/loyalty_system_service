@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// Worker polls accrual system and applies accrual updates to orders and user balances.
 type Worker struct {
 	cfg           *config.Config
 	loyaltyClient client.LoyaltyClient
@@ -25,6 +26,7 @@ type Worker struct {
 	pool          *pgxpool.Pool
 }
 
+// NewWorker creates Worker with configured dependencies and buffered jobs queue.
 func NewWorker(loyaltyClient client.LoyaltyClient, cfg *config.Config, orderRepo repository.OrderRepository,
 	userRepo repository.UserRepository, pool *pgxpool.Pool) *Worker {
 	return &Worker{
@@ -37,11 +39,13 @@ func NewWorker(loyaltyClient client.LoyaltyClient, cfg *config.Config, orderRepo
 	}
 }
 
+// Start launches worker pool and periodic reporting loop.
 func (w *Worker) Start(ctx context.Context) {
 	go w.StartWorkers(ctx)
 	go w.StartReportingGetAccrual(ctx)
 }
 
+// StartReportingGetAccrual periodically builds snapshot of pending orders and enqueues them for processing.
 func (w *Worker) StartReportingGetAccrual(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(w.cfg.Worker.IntervalGetAccrual) * time.Second)
 	defer ticker.Stop()
@@ -63,6 +67,7 @@ func (w *Worker) StartReportingGetAccrual(ctx context.Context) {
 	}
 }
 
+// StartWorkers starts configured number of worker goroutines consuming jobs channel.
 func (w *Worker) StartWorkers(ctx context.Context) {
 	for i := 0; i < w.cfg.Worker.WorkerCount; i++ {
 		w.wg.Add(1)
@@ -87,6 +92,7 @@ func (w *Worker) StartWorkers(ctx context.Context) {
 	}
 }
 
+// ProcessAccrual fetches accrual for order and applies transactional updates to order and user.
 func (w *Worker) ProcessAccrual(ctx context.Context, order models.Order) error {
 	accrual, err := w.loyaltyClient.GetAccrual(ctx, order)
 	if err != nil {
@@ -109,6 +115,7 @@ func (w *Worker) ProcessAccrual(ctx context.Context, order models.Order) error {
 	})
 }
 
+// BuildSnapshot returns orders with NEW/PROCESSING statuses eligible for accrual polling.
 func (w *Worker) BuildSnapshot(ctx context.Context) []models.Order {
 	ctxWithTime, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()

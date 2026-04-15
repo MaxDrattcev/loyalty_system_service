@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// PingDB returns health-check handler that verifies PostgreSQL connectivity.
 func PingDB(pool *pgxpool.Pool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if pool == nil {

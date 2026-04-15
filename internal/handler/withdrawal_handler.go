@@ -13,16 +13,19 @@ import (
 	"strings"
 )
 
+// withdrawalHandler implements WithdrawalHandler HTTP endpoints.
 type withdrawalHandler struct {
 	withdrawalService service.WithdrawalService
 }
 
+// NewWithdrawalHandler creates WithdrawalHandler with provided withdrawal service.
 func NewWithdrawalHandler(withdrawalService service.WithdrawalService) WithdrawalHandler {
 	return &withdrawalHandler{
 		withdrawalService: withdrawalService,
 	}
 }
 
+// Withdrawal handles authenticated withdrawal request.
 func (h *withdrawalHandler) Withdrawal(c *gin.Context) {
 	ct := c.GetHeader("Content-Type")
 	if !strings.HasPrefix(strings.ToLower(ct), "application/json") {
@@ -80,6 +83,7 @@ func (h *withdrawalHandler) Withdrawal(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// GetWithdrawals handles request for authenticated user's withdrawal history.
 func (h *withdrawalHandler) GetWithdrawals(c *gin.Context) {
 	v, exists := c.Get("userID")
 	if !exists {

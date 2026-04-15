@@ -13,12 +13,14 @@ import (
 	"net/http"
 )
 
+// App represents assembled application with HTTP router and runtime config.
 type App struct {
 	userHandler handler.UserHandler
 	cfg         *config.Config
 	router      http.Handler
 }
 
+// NewApp wires dependencies, starts background worker, and returns initialized App.
 func NewApp(ctx context.Context, cfg *config.Config, pool *pgxpool.Pool) *App {
 	jwt := token.NewJWT(cfg)
 
@@ -47,6 +49,7 @@ func NewApp(ctx context.Context, cfg *config.Config, pool *pgxpool.Pool) *App {
 	}
 }
 
+// Run starts HTTP server with configured address and router.
 func (a *App) Run() error {
 	log.Printf("Starting server on %s", a.cfg.Server.Address)
 	return http.ListenAndServe(a.cfg.Server.Address, a.router)

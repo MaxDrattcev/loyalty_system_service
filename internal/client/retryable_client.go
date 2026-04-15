@@ -15,10 +15,12 @@ import (
 
 var retryDelays = []time.Duration{1 * time.Second, 3 * time.Second, 5 * time.Second}
 
+// RetryableClient wraps resty.Client and adds retry logic for transient failures.
 type RetryableClient struct {
 	Client *resty.Client
 }
 
+// NewRetryableClient creates a RetryableClient with default resty client.
 func NewRetryableClient() *RetryableClient {
 	client := resty.New()
 	return &RetryableClient{
@@ -26,6 +28,10 @@ func NewRetryableClient() *RetryableClient {
 	}
 }
 
+// GetWithRetry performs HTTP GET with retry/backoff strategy.
+// It retries on retryable transport errors, HTTP 204, HTTP 5xx, and HTTP 429
+// (respecting Retry-After header when present).
+// Returns last response and error after retries are exhausted.
 func (r *RetryableClient) GetWithRetry(ctx context.Context, url string, headers map[string]string) (*resty.Response, error) {
 	var lastResp *resty.Response
 	var lastErr error

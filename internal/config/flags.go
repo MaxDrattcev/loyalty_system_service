@@ -7,12 +7,14 @@ import (
 	"strings"
 )
 
+// Flags contains command-line flag overrides.
 type Flags struct {
 	RunAddress           string
 	DatabaseURI          string
 	AccrualSystemAddress string
 }
 
+// ParseFlags parses supported command-line flags and validates unknown flags.
 func ParseFlags() (*Flags, error) {
 	var (
 		runAddress           = flag.String("a", "", "адрес и порт сервера")
@@ -31,6 +33,7 @@ func ParseFlags() (*Flags, error) {
 	}, nil
 }
 
+// checkUnknownFlags returns error if os.Args contains unknown flag names.
 func checkUnknownFlags() error {
 	knownFlags := make(map[string]bool)
 	flag.VisitAll(func(f *flag.Flag) {

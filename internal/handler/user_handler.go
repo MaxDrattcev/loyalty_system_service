@@ -12,16 +12,19 @@ import (
 	"unicode/utf8"
 )
 
+// userHandler implements UserHandler HTTP endpoints.
 type userHandler struct {
 	userService service.UserService
 }
 
+// NewUserHandler creates a UserHandler with provided user service dependency.
 func NewUserHandler(userService service.UserService) UserHandler {
 	return &userHandler{
 		userService: userService,
 	}
 }
 
+// Register handles user registration request
 func (u *userHandler) Register(c *gin.Context) {
 	ct := c.GetHeader("Content-Type")
 	if !strings.HasPrefix(strings.ToLower(ct), "application/json") {
@@ -88,6 +91,7 @@ type errorDB struct {
 	status int
 }
 
+// Login handles user authentication request.
 func (u *userHandler) Login(c *gin.Context) {
 	ct := c.GetHeader("Content-Type")
 	if !strings.HasPrefix(strings.ToLower(ct), "application/json") {
@@ -124,6 +128,7 @@ func (u *userHandler) Login(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// GetBalance returns authenticated user's balance.
 func (u *userHandler) GetBalance(c *gin.Context) {
 	v, exists := c.Get("userID")
 	if !exists {

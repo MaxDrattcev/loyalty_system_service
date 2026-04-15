@@ -1,3 +1,5 @@
+// Package config provides loading and merging application configuration
+// from YAML file, command-line flags, and environment variables.
 package config
 
 import (
@@ -8,6 +10,7 @@ import (
 	"os"
 )
 
+// Config contains full application configuration.
 type Config struct {
 	Server   ServerConfig   `yaml:"server"`
 	Postgres PostgresConfig `yaml:"postgres"`
@@ -16,9 +19,12 @@ type Config struct {
 	Worker   WorkerConfig   `yaml:"worker"`
 }
 
+// ServerConfig contains HTTP server settings.
 type ServerConfig struct {
 	Address string `yaml:"address"`
 }
+
+// PostgresConfig contains PostgreSQL connection and pool settings.
 type PostgresConfig struct {
 	Host            string `yaml:"host"`
 	Port            string `yaml:"port"`
@@ -34,21 +40,25 @@ type PostgresConfig struct {
 	PathMigration   string `yaml:"path_migration"`
 }
 
+// JWTTokenConfig contains JWT signing settings.
 type JWTTokenConfig struct {
 	Secret    string `yaml:"secret"`
 	ExpiresAt int32  `yaml:"expires_at"`
 }
 
+// ClientConfig contains external accrual client settings.
 type ClientConfig struct {
 	Address string `yaml:"address"`
 }
 
+// WorkerConfig contains background worker settings.
 type WorkerConfig struct {
 	QueueSize          int   `yaml:"queue_size"`
 	WorkerCount        int   `yaml:"worker_count"`
 	IntervalGetAccrual int32 `yaml:"interval_get_accrual"`
 }
 
+// LoadYAML loads configuration from YAML file and initializes derived fields (e.g. DSN).
 func LoadYAML(configPath string) (*Config, error) {
 	if configPath == "" {
 		configPath = "config/config.yaml"
@@ -65,6 +75,7 @@ func LoadYAML(configPath string) (*Config, error) {
 	return &config, nil
 }
 
+// initDSN builds PostgreSQL DSN string from PostgresConfig fields.
 func initDSN(cfg Config) string {
 	u := url.URL{
 		Scheme: "postgres",

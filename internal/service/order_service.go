@@ -12,16 +12,21 @@ import (
 )
 
 var (
-	ErrNoOrders                       = errors.New("no orders")
+	// ErrNoOrders indicates that user has no uploaded orders.
+	ErrNoOrders = errors.New("no orders")
+
+	// ErrOrderAlreadyUploadedBySameUser indicates duplicate upload by the same user.
 	ErrOrderAlreadyUploadedBySameUser = errors.New("order already uploaded by same user")
 )
 
+// orderService implements order business logic.
 type orderService struct {
 	orderRepo     repository.OrderRepository
 	loyaltyClient client.LoyaltyClient
 	worker        *Worker
 }
 
+// NewOrderService creates OrderService with repository, accrual client, and worker.
 func NewOrderService(orderRepo repository.OrderRepository, loyaltyClient client.LoyaltyClient, worker *Worker) OrderService {
 	return &orderService{
 		orderRepo:     orderRepo,
@@ -30,6 +35,8 @@ func NewOrderService(orderRepo repository.OrderRepository, loyaltyClient client.
 	}
 }
 
+// Create creates order record and enqueues it for background accrual processing.
+// Handles duplicate-order conflicts and distinguishes same-user duplicates.
 func (s *orderService) Create(ctx context.Context, numberOrder, userID int64) error {
 	order := models.Order{
 		Number: numberOrder,
@@ -57,6 +64,8 @@ func (s *orderService) Create(ctx context.Context, numberOrder, userID int64) er
 	return nil
 }
 
+// GetOrders returns user orders formatted for API response.
+// Converts accrual from cents to float and formats upload time using RFC3339.
 func (s *orderService) GetOrders(ctx context.Context, userID int64) ([]models.OrderResponse, error) {
 	orders, err := s.orderRepo.GetOrdersByUserID(ctx, userID)
 	if err != nil {

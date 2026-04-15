@@ -12,8 +12,10 @@ import (
 	"time"
 )
 
+// ErrNoWithdraws indicates that user has no withdrawal history.
 var ErrNoWithdraws = errors.New("no withdraws")
 
+// withdrawalService implements withdrawal business logic.
 type withdrawalService struct {
 	orderRepo      repository.OrderRepository
 	userRepo       repository.UserRepository
@@ -21,6 +23,7 @@ type withdrawalService struct {
 	pool           *pgxpool.Pool
 }
 
+// NewWithdrawalService creates WithdrawalService with required repositories and DB pool.
 func NewWithdrawalService(orderRepo repository.OrderRepository, userRepo repository.UserRepository,
 	withdrawalRepo repository.WithdrawalRepository, pool *pgxpool.Pool) WithdrawalService {
 	return &withdrawalService{
@@ -31,6 +34,8 @@ func NewWithdrawalService(orderRepo repository.OrderRepository, userRepo reposit
 	}
 }
 
+// Withdrawal performs atomic withdrawal transaction:
+// creates order record, decreases user balance (if enough funds), and stores withdrawal history.
 func (w *withdrawalService) Withdrawal(ctx context.Context, userID, order int64, sum float64) error {
 	intWd := int64(math.Round(sum * 100))
 	return repository.WithTxRetry(ctx, w.pool, func(tx pgx.Tx) error {
@@ -59,6 +64,8 @@ func (w *withdrawalService) Withdrawal(ctx context.Context, userID, order int64,
 	})
 }
 
+// GetWithdrawals returns user withdrawals in API response format.
+// Converts stored cents to float values and formats processed time as RFC3339.
 func (w *withdrawalService) GetWithdrawals(ctx context.Context, userID int64) ([]models.WithdrawalResponse, error) {
 	var withdrawalsResp []models.WithdrawalResponse
 	withdrawals, err := w.withdrawalRepo.GetWithdrawals(ctx, userID)

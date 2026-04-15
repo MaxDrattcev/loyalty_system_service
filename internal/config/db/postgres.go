@@ -1,3 +1,5 @@
+// Package db provides PostgreSQL initialization utilities
+// including pool creation, connectivity checks, and migrations.
 package db
 
 import (
@@ -9,6 +11,8 @@ import (
 	"time"
 )
 
+// NewConDB creates PostgreSQL connection pool, verifies connectivity with Ping,
+// runs migrations, and returns initialized pool.
 func NewConDB(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
 	if cfg.Postgres.DSN == "" {
 		return nil, fmt.Errorf("database DSN is empty")

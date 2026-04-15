@@ -16,6 +16,8 @@ func init() {
 	}
 }
 
+// Logger logs basic HTTP request/response metadata:
+// URI, method, duration, status code, and response size.
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()

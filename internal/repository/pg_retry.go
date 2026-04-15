@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// retryablePGCodes contains PostgreSQL SQLSTATE codes that are considered transient
+// and safe to retry during transaction begin/execute flow.
 var retryablePGCodes = map[string]bool{
 	"40000": true,
 	"40001": true,
@@ -31,10 +33,22 @@ var retryablePGCodes = map[string]bool{
 	"58030": true,
 }
 
+// dbRetryDelays defines backoff delays between retry attempts in WithTxRetry.
 var dbRetryDelays = []time.Duration{1 * time.Second, 3 * time.Second, 5 * time.Second}
 
+// Tx is an alias for pgx.Tx used in repository helpers and signatures.
 type Tx = pgx.Tx
 
+// WithTxRetry executes fn in a database transaction with retry logic for transient
+// PostgreSQL/transport errors.
+//
+// Behavior:
+// - starts a transaction via pool.Begin
+// - executes fn(tx)
+// - commits on success
+// - rolls back on fn error
+// - retries begin/fn failures only when isRetryablePGTransportError returns true
+// - stops immediately on non-retryable errors or context cancellation/deadline
 func WithTxRetry(ctx context.Context, pool *pgxpool.Pool, fn func(tx pgx.Tx) error) error {
 	var lastErr error
 
@@ -71,6 +85,9 @@ func WithTxRetry(ctx context.Context, pool *pgxpool.Pool, fn func(tx pgx.Tx) err
 	}
 }
 
+// isRetryablePGTransportError reports whether err represents a transient PostgreSQL
+// or transport-level failure that should be retried.
+// It returns false for context cancellation/deadline errors.
 func isRetryablePGTransportError(err error) bool {
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return false
@@ -87,6 +104,7 @@ func isRetryablePGTransportError(err error) bool {
 	return retryablePGCodes[pgErr.Code]
 }
 
+// sleep waits for duration d or returns context error if ctx is done earlier.
 func sleep(ctx context.Context, d time.Duration) error {
 	t := time.NewTimer(d)
 	defer t.Stop()

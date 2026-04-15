@@ -1,3 +1,4 @@
+// Package token provides JWT generation and parsing utilities for authentication.
 package token
 
 import (
@@ -7,22 +8,26 @@ import (
 	"time"
 )
 
+// JWT provides methods to build and parse JWT tokens.
 type JWT struct {
 	cfg *config.Config
 }
 
+// NewJWT creates JWT helper with provided application config.
 func NewJWT(cfg *config.Config) JWT {
 	return JWT{
 		cfg: cfg,
 	}
 }
 
+// Claims represents JWT payload with application-specific user fields.
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID int64  `json:"user_id"`
 	Login  string `json:"login"`
 }
 
+// BuildJWTString builds and signs JWT token for user identity.
 func (j *JWT) BuildJWTString(userID int64, login string) (string, error) {
 	now := time.Now()
 	claims := &Claims{
@@ -43,6 +48,7 @@ func (j *JWT) BuildJWTString(userID int64, login string) (string, error) {
 	return tokenString, nil
 }
 
+// ParseJWT validates token and returns user ID from claims.
 func (j *JWT) ParseJWT(tokenString string) (int64, error) {
 	claims := &Claims{}
 	_, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
