@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    login VARCHAR(100) NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    current_balance BIGINT NOT NULL DEFAULT 0,
+    total_withdrawn BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_login ON users(login);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    number BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'NEW',
+    accrual BIGINT NOT NULL DEFAULT 0,
+    uploaded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_number ON orders(number);
+
+CREATE TABLE IF NOT EXISTS withdrawal_history (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    order_number BIGINT NOT NULL,
+    sum_withdrawal BIGINT NOT NULL,
+    processed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

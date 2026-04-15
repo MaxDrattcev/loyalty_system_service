@@ -1,0 +1,31 @@
+with-expecter: true
+resolve-type-alias: false
+disable-version-string: true
+issue-845-fix: true
+dir: "internal/mocks"
+outpkg: "mocks"
+mockname: "Mock_{{.InterfaceName}}"
+filename: "mock_{{.InterfaceName}}.go"
+
+packages:
+  github.com/MaxDrattcev/loyalty_system_service.git/internal/handler:
+    interfaces:
+      UserHandler: {}
+      OrderHandler: {}
+      WithdrawalHandler: {}
+
+  github.com/MaxDrattcev/loyalty_system_service.git/internal/service:
+    interfaces:
+      UserService: {}
+      OrderService: {}
+      WithdrawalService: {}
+
+  github.com/MaxDrattcev/loyalty_system_service.git/internal/repository:
+    interfaces:
+      UserRepository: {}
+      OrderRepository: {}
+      WithdrawalRepository: {}
+
+  github.com/MaxDrattcev/loyalty_system_service.git/internal/client:
+    interfaces:
+      LoyaltyClient: {}
